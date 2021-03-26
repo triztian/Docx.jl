@@ -2,8 +2,26 @@ module Docx
 
 using ZipFile
 
+mutable struct DocxFile
+    _zipFile::ZipFile.ReadableFile 
+
+    name::String
+    extension::String
+
+    string_contents::Union{String, Nothing}
+    binary_contents::Union{UInt8, Nothing}
+end
+
+function read_string(docx_file::DocxFile)::String
+    read(docx_file._zipFile, String)
+end
+
+function read_binary(docx_file::DocxFile)::Vector{UInt8}
+    read(docx_file._zipFile, UInt8)
+end
+
 mutable struct Document
-    _fileNames::Array{String}
+    _files::Vector{DocxFile}
 end
 
 """
@@ -15,10 +33,10 @@ function open(docx_path::String)::Document
     doc = Document([])
 
     for file in zarchive.files 
-        if endswith(file.name, ".xml")
-            push!(doc._fileNames, file.name)
-            # println(read(file, String))
-        end
+        ext = last(split(file.name, "."))
+        name = first(split(file.name, "."))
+        df = DocxFile(file, name, ext, nothing, nothing)
+        push!(doc._files, df)
     end
 
     return doc
