@@ -1,0 +1,8 @@
+name = "Docx"
+uuid = "cae6eaf6-1b4f-40a4-a2e0-a9a4c95b4cc3"
+authors = ["Tristian Azuara <tristian.azuara@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+ZipFile = "a5390f91-8eb1-5f08-bee0-b1d1ffed6cea"
