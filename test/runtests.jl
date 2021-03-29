@@ -5,23 +5,10 @@ using Docx, Test
     println("Test Docx", docx_path)
 
     doc = Docx.open(docx_path)
-    for file in doc._files
-        println("=========== ")
-        println("ZipName: ", file._zipFile.name)
-        println("Name: ", file.name)
-        println("Extension: ", file.extension)
+    result = Docx.read_plaintext(doc)
 
-        # if file.name == "[Content_Types]"
-        #     println(Docx.read_string(file))
-        # end
-        
-        if file.name == "word/document"
-            println(Docx.read_string(file))
-        end
-
-        # if file.extension == "xml"
-        #     println(Docx.read_string(file))
-        # end
-        println()
-    end
+    @test result == """
+    python-docx was here!
+    python-docx was here too!
+    """
 end
