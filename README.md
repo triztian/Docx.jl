@@ -25,5 +25,5 @@ document = Docx.open("/path/to/document.docx")
 Obtaining the plain text from the document:
 
 ```julia
-Docx.read_plaintext(document)
+Docx.read(document, String)
 ```

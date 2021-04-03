@@ -1,37 +1,69 @@
 
 using EzXML
 
+
 """
+Read the contents of the document as a string.
+
+  * Header text will be clustered
+  * Paragraphs will be separated by new lines.
+  * Footnotes will be clustered 
 """
-function read_plaintext(docx::Document)::String 
+function read(docx::Document, ::Type{String})::String 
     plaintext = ""
 
-    # TODO: Probably rewrite to be less nested
     for (i, file) in enumerate(docx._files)
-        if file.extension == "xml"
-            str = strip(_extract_text(read_string!(file)))
-            if !isempty(str)
-                plaintext *= str
-
-                if i < length(docx._files)
-                    plaintext *= "\n"
-                end
-            end
+        if file.extension != "xml"
+			continue
         end
+
+		str = strip(_extract_text(read!(file, String)))
+		if !isempty(str)
+			plaintext *= str
+
+			if i < length(docx._files)
+				plaintext *= "\n"
+			end
+		end
     end
 
     plaintext
 end
 
 """
+A type that indicates to return the contents as XML strings
+"""
+abstract type XML end
+
+"""
+	read(docx, XML)
+
+Reads the contents of the document and returns them as a plain string
+
+  * Header text will be clustered
+  * Paragraphs will be separated by new lines.
+  * Footnotes will be clustered 
+"""
+function read(docx::Document, ::Type{XML})::String
+	xml_nodes = ""
+    for (i, file) in enumerate(docx._files)
+        if file.extension == "xml"
+			xml_nodes *= read!(file, String)
+        end
+    end
+
+	xml_nodes
+end
+
+"""
 Reads the docfile contents as a string
 """
-function read_string!(docx_file::DocxFile)::String
+function read!(docx_file::DocxFile, ::Type{String})::String
     if docx_file.string_contents !== nothing
         return docx_file.string_contents::String
     end
 
-    str = read(docx_file._zipFile, String)
+    str = Base.read(docx_file._zipFile, String)
     docx_file.string_contents = str
     return str
 end
@@ -53,20 +85,19 @@ end
 Extracts text elements from the given XML structure
 """
 function _extract_text(xml_string::String)::String
-    # Get the root element from `doc`.
     text = ""
-    # println(xml_string)
+
     doc = parsexml(xml_string)
     root_elem = root(doc)
 
     elems = _flatten(root_elem)
-    # println(elems)
     for (i, elem) in enumerate(elems)
+		if elem.name == "p"
+			text *= "\n"
+		end
+
         if _is_docx_text_node(elem)
             text *= nodecontent(elem)
-            if i < length(elems)
-                text *= "\n"
-            end
         end
     end
 

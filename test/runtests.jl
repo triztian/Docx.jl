@@ -1,14 +1,32 @@
 using Docx, Test
 
-@testset "open" begin
-    docx_path = string(@__DIR__, "/test_files/test.docx")
-    println("Test Docx", docx_path)
+if isempty(ARGS) || "all" in ARGS
+	all_tests = true
+else
+	all_tests = false
+end
 
-    doc = Docx.open(docx_path)
-    result = Docx.read_plaintext(doc)
+if all_tests || "test.docx" in ARGS
+	@testset "test.docx" begin
+		docx_path = string(@__DIR__, "/test_files/test.docx")
 
-    @test result == """
-    python-docx was here!
-    python-docx was here too!
-    """
+		doc = Docx.open(docx_path)
+		result = Docx.read(doc, String)
+
+		@test result == """
+		python-docx was here!
+		python-docx was here too!
+		"""
+	end
+end
+
+if all_tests || "style_table_shape.docx" in ARGS
+	@testset "style_table_shape.docx" begin
+		docx_path = string(@__DIR__, "/test_files/style_table_shape.docx")
+
+		doc = Docx.open(docx_path)
+		result = Docx.read(doc, String)
+
+		println(result)
+	end
 end

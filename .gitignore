@@ -25,5 +25,9 @@ Manifest.toml
 
 # Misc
 
+# Unzipped Docx files
+test_files_unzipped/
+
+
 ## macOS
 .DS_Store
