@@ -8,23 +8,26 @@ Read the contents of the document as a string.
   * Header text will be clustered
   * Paragraphs will be separated by new lines.
   * Footnotes will be clustered 
+
+**NOTE**: This will internally mutate `docx` but multiple calls to this
+function with the same docx will return the same string.
 """
 function read(docx::Document, ::Type{String})::String 
     plaintext = ""
 
     for (i, file) in enumerate(docx._files)
         if file.extension != "xml"
-			continue
+            continue
         end
 
-		str = strip(_extract_text(read!(file, String)))
-		if !isempty(str)
-			plaintext *= str
+        str = strip(_extract_text(read!(file, String)))
+        if !isempty(str)
+            plaintext *= str
 
-			if i < length(docx._files)
-				plaintext *= "\n"
-			end
-		end
+            if i < length(docx._files)
+                plaintext *= "\n"
+            end
+        end
     end
 
     plaintext
@@ -36,7 +39,7 @@ A type that indicates to return the contents as XML strings
 abstract type XML end
 
 """
-	read(docx, XML)
+    read(docx, XML)
 
 Reads the contents of the document and returns them as a plain string
 
@@ -45,14 +48,14 @@ Reads the contents of the document and returns them as a plain string
   * Footnotes will be clustered 
 """
 function read(docx::Document, ::Type{XML})::String
-	xml_nodes = ""
+    xml_nodes = ""
     for (i, file) in enumerate(docx._files)
         if file.extension == "xml"
-			xml_nodes *= read!(file, String)
+            xml_nodes *= read!(file, String)
         end
     end
 
-	xml_nodes
+    xml_nodes
 end
 
 """
@@ -92,12 +95,13 @@ function _extract_text(xml_string::String)::String
 
     elems = _flatten(root_elem)
     for (i, elem) in enumerate(elems)
-		if elem.name == "p"
-			text *= "\n"
-		end
+        if elem.name == "p"
+            text *= "\n"
+        end
 
         if _is_docx_text_node(elem)
             text *= nodecontent(elem)
+            text = replace(text, "\u00a0" => "\u0020") 
         end
     end
 

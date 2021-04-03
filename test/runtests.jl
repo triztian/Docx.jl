@@ -27,6 +27,48 @@ if all_tests || "style_table_shape.docx" in ARGS
 		doc = Docx.open(docx_path)
 		result = Docx.read(doc, String)
 
-		println(result)
+		# TODO: Handle de-duplication of "Shape 1 Text"
+		# TODO: Add support for producing a "markdown" table
+		expected = """
+Docx.jl Sample Document 2
+
+This sample document contains various styles and objects that contain text.
+
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+This is an italics paragraph.
+
+This is a BOLD paragraph.
+
+This is an underlined paragraph
+
+Column 1
+Column 2
+Column 3
+R1C1
+R1C2
+R1C3
+R2C1
+R2C2
+R2C3
+
+
+
+Shape 1 Text
+Shape 1 Text
+"""
+		@test length(result) == length(expected)
+		for i = 1:length(expected)
+			@test result[i] == expected[i]
+			@test codepoint(result[i]) ==  codepoint(expected[i])
+
+			if codepoint(result[i]) != codepoint(expected[i])
+				println("nth[$i]")
+				println(expected[1:i])
+				println("---")
+				println(result[1:i])
+				return
+			end
+		end
 	end
 end
